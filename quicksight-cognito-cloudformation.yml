@@ -1,0 +1,55 @@
+Resources:
+
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: quicksight-cognito-lambda-execution-role
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+              - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+        Policies:
+          - PolicyDocument:
+              Version: 2012-10-17
+              Statement:
+                - Action:
+                    - cognito-identity:GetId
+                    - cognito-identity:GetOpenIdToken
+                  Effect: Allow
+                  Resource: '*'
+            PolicyName: quicksight-cognito-execution-policy
+
+  
+  QuicksightCognitoFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: quicksight-cognito-lambda
+      Handler: index.handler
+      Runtime: nodejs12.x
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Code:
+        ZipFile: !Sub |
+          exports.handler = function(event, context) {
+            console.log('upload quicksight cognito code');
+          };
+      Environment:
+        Variables:
+          COGNITO_IDENTITY_POOL_ID: poolId
+          COGNITO_USER_POOL_URL: poolUrl
+          STS_ROLE_ARN_TO_ASSUME: roleToAssume
+          QUICKSIGHT_REGION: region
+          QUICKSIGHT_DASHBOARD_ID: dashboardId
+          AWS_ACCOUNT_ID: accountId
+
+    # APIGatewayEndpoint:
+    #   Type: AWS::ApiGateway::RestApi
+    #   Properties:
+    #     Name: quicksight-cognito-api
+    #     EndpointConfiguration:
+    #       Types:
+    #         - EDGE
