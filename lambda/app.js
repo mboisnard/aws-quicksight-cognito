@@ -15,7 +15,12 @@ const router = express.Router();
 router.use(cors());
 router.use(bodyParser.json());
 
-router.get('/url', async (req, res) => {
+const handleErrorAsync = func => (req, res, next) => {
+    func(req, res, next)
+        .catch((error) => next(error));
+};
+
+router.get('/url', handleErrorAsync(async (req, res, next) => {
 
     const { event } = getCurrentInvoke();
 
@@ -35,6 +40,7 @@ router.get('/url', async (req, res) => {
 
     const quickSightInfos = {
         region: process.env.QUICKSIGHT_REGION,
+        namespace: 'default',
         dashboard: {
             id: process.env.QUICKSIGHT_DASHBOARD_ID,
             disableReset: false,
@@ -45,7 +51,8 @@ router.get('/url', async (req, res) => {
         user: {
             email: decodedIdToken.email,
             sessionName: decodedIdToken.sub,
-            roleArn: stsInfos.roleToAssumeArn
+            roleName: 'READER',
+            iamRoleArn: stsInfos.roleToAssumeArn
         }
     };
 
@@ -61,21 +68,21 @@ router.get('/url', async (req, res) => {
         }
     });
 
-    let quicksightUrl;
 
     try {
         await createQuicksightUserIfNotExists(quicksightApi, quickSightInfos);
-        quicksightUrl = await getQuicksightEmbeddedUrl(quicksightApi, quickSightInfos);
     } catch (err) {
-        if (err.code && err.code === 'ResourceExistsException') {
-            quicksightUrl = await getQuicksightEmbeddedUrl(quicksightApi, quickSightInfos);
-        } else {
-            res.json({err});
+        if (!err.code || err.code !== 'ResourceExistsException') {
+            next(err);
         }
     }
+    
+    const quicksightUrl = await getQuicksightEmbeddedUrl(quicksightApi, quickSightInfos);
 
-    res.json({ url: quicksightUrl.EmbedUrl });
-});
+    res.status(200).json({ 
+        url: quicksightUrl.EmbedUrl
+    });
+}));
 
 async function getCognitoOpenIdToken(cognitoInfos) {
 
@@ -114,9 +121,9 @@ async function createQuicksightUserIfNotExists(quicksightApi, quickSightInfos) {
         AwsAccountId: quickSightInfos.accountId,
         Email: quickSightInfos.user.email,
         IdentityType: 'IAM',
-        Namespace: 'default',
-        UserRole: 'READER',
-        IamArn: quickSightInfos.user.roleArn,
+        Namespace: quickSightInfos.namespace,
+        UserRole: quickSightInfos.user.roleName,
+        IamArn: quickSightInfos.user.iamRoleArn,
         SessionName: quickSightInfos.user.sessionName
     };
 
@@ -137,6 +144,14 @@ async function getQuicksightEmbeddedUrl(quicksightApi, quickSightInfos) {
     return quicksightApi.getDashboardEmbedUrl(dashboardParams).promise();
 }
 
+function errorHandler(err, req, res, next) {
+    return res.status(500).json({
+        status: 'error',
+        message: err.message
+    });
+}
+
 app.use('/', router);
+app.use(errorHandler);
 
 module.exports = app;
