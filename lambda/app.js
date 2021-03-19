@@ -68,7 +68,6 @@ router.get('/url', handleErrorAsync(async (req, res, next) => {
         }
     });
 
-
     try {
         await createQuicksightUserIfNotExists(quicksightApi, quickSightInfos);
     } catch (err) {

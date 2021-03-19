@@ -13,17 +13,16 @@ Resources:
               - lambda.amazonaws.com
             Action:
               - sts:AssumeRole
-        Policies:
-          - PolicyDocument:
-              Version: 2012-10-17
-              Statement:
-                - Action:
-                    - cognito-identity:GetId
-                    - cognito-identity:GetOpenIdToken
-                  Effect: Allow
-                  Resource: '*'
-            PolicyName: quicksight-cognito-execution-policy
-
+      Policies:
+        - PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Action:
+                  - cognito-identity:GetId
+                  - cognito-identity:GetOpenIdToken
+                Effect: Allow
+                Resource: '*'
+          PolicyName: quicksight-cognito-execution-policy
   
   QuicksightCognitoFunction:
     Type: AWS::Lambda::Function
@@ -46,10 +45,35 @@ Resources:
           QUICKSIGHT_DASHBOARD_ID: dashboardId
           AWS_ACCOUNT_ID: accountId
 
-    # APIGatewayEndpoint:
-    #   Type: AWS::ApiGateway::RestApi
-    #   Properties:
-    #     Name: quicksight-cognito-api
-    #     EndpointConfiguration:
-    #       Types:
-    #         - EDGE
+  APIGatewayHttpApi:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: quicksight-cognito-api-gateway
+      Description: Quicksight Cognito API forward to lambda
+      ProtocolType: HTTP
+
+  APIGatewayLambdaIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref APIGatewayHttpApi
+      IntegrationType: AWS_PROXY
+      PayloadFormatVersion: 2.0
+      IntegrationUri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${QuicksightCognitoFunction.Arn}/invocations'
+
+  APIGatewayLambdaProxyRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref APIGatewayHttpApi
+      RouteKey: 'ANY /quicksight-cognito/{proxy+}'
+      Target: !Join
+        - /
+        - - integrations
+          - !Ref APIGatewayLambdaIntegration
+
+  APIGatewayDevStage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      StageName: Dev
+      Description: Dev Stage
+      AutoDeploy: true
+      ApiId: !Ref APIGatewayHttpApi
