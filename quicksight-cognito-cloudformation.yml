@@ -1,5 +1,6 @@
 Resources:
 
+#### Lambda ####
   LambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:
@@ -20,6 +21,9 @@ Resources:
               - Action:
                   - cognito-identity:GetId
                   - cognito-identity:GetOpenIdToken
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
                 Effect: Allow
                 Resource: '*'
           PolicyName: quicksight-cognito-execution-policy
@@ -44,7 +48,9 @@ Resources:
           QUICKSIGHT_REGION: region
           QUICKSIGHT_DASHBOARD_ID: dashboardId
           AWS_ACCOUNT_ID: accountId
+#### ####
 
+#### API Gateway ####
   APIGatewayHttpApi:
     Type: AWS::ApiGatewayV2::Api
     Properties:
@@ -77,3 +83,32 @@ Resources:
       Description: Dev Stage
       AutoDeploy: true
       ApiId: !Ref APIGatewayHttpApi
+#### ####
+
+#### Cognito ####
+
+  CognitoUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: quicksight-cognito-user-pool
+
+  CognitoUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      UserPoolId: !Ref CognitoUserPool
+      ClientName: quicksight-cognito-web-app
+      AccessTokenValidity: 1 # eq 1 hour
+      IdTokenValidity: 1 # eq 1 hour
+      RefreshTokenValidity: 1 # eq 1 day
+      AllowedOAuthFlows:
+        - code
+      AllowedOAuthScopes:
+        - openid
+        - email
+        - profile
+      AllowedOAuthFlowsUserPoolClient: true
+      CallbackURLs:
+        - http://localhost:8080/callback
+      GenerateSecret: true
+      SupportedIdentityProviders:
+        - COGNITO
