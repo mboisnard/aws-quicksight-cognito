@@ -35,7 +35,7 @@ Resources:
     Properties:
       FunctionName: quicksight-cognito-lambda
       Handler: index.handler
-      Runtime: nodejs14.x
+      Runtime: nodejs12.x
       Role: !GetAtt LambdaExecutionRole.Arn
       Code:
         ZipFile: !Sub |
@@ -130,4 +130,78 @@ Resources:
       GenerateSecret: true
       SupportedIdentityProviders:
         - COGNITO
+
+  CognitoIdentityPool:
+    Type: AWS::Cognito::IdentityPool
+    Properties:
+      AllowUnauthenticatedIdentities: false
+      IdentityPoolName: quicksight-cognito-identity-pool
+      CognitoIdentityProviders:
+        - ProviderName: !GetAtt CognitoUserPool.ProviderName
+          ClientId: !Ref CognitoUserPoolClient
+
+  CognitoIdentityPoolRoleAttachment:
+    Type: AWS::Cognito::IdentityPoolRoleAttachment
+    Properties:
+      IdentityPoolId: !Ref CognitoIdentityPool
+      Roles:
+        "authenticated": !GetAtt CognitoAuthenticatedRole.Arn
+        "unauthenticated": !GetAtt CognitoUnAuthenticatedRole.Arn
+
+  CognitoAuthenticatedRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: cognito-connected-user-role
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated:
+                - cognito-identity.amazonaws.com
+            Action:
+              - sts:AssumeRoleWithWebIdentity
+            Condition: { "ForAnyValue:StringLike": { "cognito-identity.amazonaws.com:amr": "authenticated" },  "StringEquals": { "cognito-identity.amazonaws.com:aud": !Ref CognitoIdentityPool } }
+      Policies:
+        - PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Action:
+                  - mobileanalytics:PutEvents
+                  - cognito-sync:*
+                  - cognito-identity:*
+                  - quicksight:RegisterUser
+                  - quicksight:GetDashboardEmbedUrl
+                  - sts:AssumeRole
+                Effect: Allow
+                Resource: '*'
+          PolicyName: cognito-connected-user-policy
+
+  CognitoUnAuthenticatedRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: cognito-guest-user-role
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated:
+                - cognito-identity.amazonaws.com
+            Action:
+              - sts:AssumeRoleWithWebIdentity
+            Condition: { "ForAnyValue:StringLike": { "cognito-identity.amazonaws.com:amr": "unauthenticated" },  "StringEquals": { "cognito-identity.amazonaws.com:aud": !Ref CognitoIdentityPool } }
+      Policies:
+        - PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Action:
+                  - mobileanalytics:PutEvents
+                  - cognito-sync:*
+                Effect: Allow
+                Resource: '*'
+          PolicyName: cognito-guest-user-policy
+#### ####
+
+#### Quicksight ####
 #### ####
