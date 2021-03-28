@@ -35,7 +35,7 @@ Resources:
     Properties:
       FunctionName: quicksight-cognito-lambda
       Handler: index.handler
-      Runtime: nodejs12.x
+      Runtime: nodejs14.x
       Role: !GetAtt LambdaExecutionRole.Arn
       Code:
         ZipFile: !Sub |
@@ -51,7 +51,7 @@ Resources:
           QUICKSIGHT_DASHBOARD_ID: dashboardId
           AWS_ACCOUNT_ID: accountId
 
-  QuicksightCognitoPermission:
+  LambdaPermission:
     Type: AWS::Lambda::Permission
     Properties:
       FunctionName: !GetAtt QuicksightCognitoFunction.Arn
@@ -75,7 +75,7 @@ Resources:
       PayloadFormatVersion: 2.0
       IntegrationUri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${QuicksightCognitoFunction.Arn}/invocations'
       RequestParameters:
-        'overwrite:path': '$request.path'
+        'overwrite:path': '$request.path' # Remove any stage name from path
 
   APIGatewayLambdaProxyRoute:
     Type: AWS::ApiGatewayV2::Route
@@ -124,7 +124,6 @@ Resources:
       AllowedOAuthScopes:
         - openid
         - email
-        - profile
       AllowedOAuthFlowsUserPoolClient: true
       CallbackURLs:
         - http://localhost:8080/callback
