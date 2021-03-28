@@ -40,7 +40,7 @@ Resources:
       Code:
         ZipFile: !Sub |
           exports.handler = function(event, context) {
-            console.log('upload quicksight cognito code');
+            console.log('upload quicksight cognito code & update nodejs version to nodejs14.x');
           };
       Environment:
         Variables:
