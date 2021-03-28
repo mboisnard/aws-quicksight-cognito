@@ -50,6 +50,13 @@ Resources:
           QUICKSIGHT_REGION: region
           QUICKSIGHT_DASHBOARD_ID: dashboardId
           AWS_ACCOUNT_ID: accountId
+
+  QuicksightCognitoPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt QuicksightCognitoFunction.Arn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
 #### ####
 
 #### API Gateway ####
@@ -67,6 +74,8 @@ Resources:
       IntegrationType: AWS_PROXY
       PayloadFormatVersion: 2.0
       IntegrationUri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${QuicksightCognitoFunction.Arn}/invocations'
+      RequestParameters:
+        'overwrite:path': '$request.path'
 
   APIGatewayLambdaProxyRoute:
     Type: AWS::ApiGatewayV2::Route
@@ -91,7 +100,7 @@ Resources:
       Description: Dev Stage
       AccessLogSettings:
         DestinationArn: !GetAtt APIGatewayLogGroup.Arn
-        Format: '{ "requestId":"$context.requestId", "ip": "$context.identity.sourceIp", "requestTime":"$context.requestTime", "httpMethod":"$context.httpMethod","routeKey":"$context.routeKey", "status":"$context.status","protocol":"$context.protocol", "responseLength":"$context.responseLength", "integrationError":"$context.integrationErrorMessage"}'
+        Format: '{ "requestId":"$context.requestId", "ip": "$context.identity.sourceIp", "requestTime":"$context.requestTime", "httpMethod":"$context.httpMethod","routeKey":"$context.routeKey", "status":"$context.status","protocol":"$context.protocol", "responseLength":"$context.responseLength", "integrationError":"$context.integrationErrorMessage" }'
       AutoDeploy: true
       ApiId: !Ref APIGatewayHttpApi
 #### ####
