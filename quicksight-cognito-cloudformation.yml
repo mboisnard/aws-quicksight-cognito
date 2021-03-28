@@ -1,6 +1,8 @@
 Resources:
 
 #### Lambda ####
+  # You can use AWS::Serverless::Function task to wrap IAM execution role & Lambda Function creation inside only one task
+
   LambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:
@@ -76,17 +78,25 @@ Resources:
         - - integrations
           - !Ref APIGatewayLambdaIntegration
 
+  APIGatewayLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: api-gateway-log-grp
+      RetentionInDays: 1
+
   APIGatewayDevStage:
     Type: AWS::ApiGatewayV2::Stage
     Properties:
       StageName: Dev
       Description: Dev Stage
+      AccessLogSettings:
+        DestinationArn: !GetAtt APIGatewayLogGroup.Arn
+        Format: '{ "requestId":"$context.requestId", "ip": "$context.identity.sourceIp", "requestTime":"$context.requestTime", "httpMethod":"$context.httpMethod","routeKey":"$context.routeKey", "status":"$context.status","protocol":"$context.protocol", "responseLength":"$context.responseLength", "integrationError":"$context.integrationErrorMessage"}'
       AutoDeploy: true
       ApiId: !Ref APIGatewayHttpApi
 #### ####
 
 #### Cognito ####
-
   CognitoUserPool:
     Type: AWS::Cognito::UserPool
     Properties:
@@ -112,3 +122,4 @@ Resources:
       GenerateSecret: true
       SupportedIdentityProviders:
         - COGNITO
+#### ####
