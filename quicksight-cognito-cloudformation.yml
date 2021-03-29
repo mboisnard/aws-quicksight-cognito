@@ -44,14 +44,14 @@ Resources:
           };
       Environment:
         Variables:
-          COGNITO_IDENTITY_POOL_ID: poolId
-          COGNITO_USER_POOL_URL: poolUrl
-          STS_ROLE_ARN_TO_ASSUME: roleToAssume
-          QUICKSIGHT_REGION: region
+          COGNITO_IDENTITY_POOL_ID: !Ref CognitoIdentityPool
+          COGNITO_USER_POOL_URL: !GetAtt CognitoUserPool.ProviderURL
+          STS_ROLE_ARN_TO_ASSUME: !GetAtt ConnectedUserRoleToAssume.Arn
+          QUICKSIGHT_REGION: !Ref 'AWS::Region'
           QUICKSIGHT_DASHBOARD_ID: dashboardId
-          AWS_ACCOUNT_ID: accountId
+          AWS_ACCOUNT_ID: !Ref 'AWS::AccountId'
 
-  LambdaPermission:
+  LambdaApiGatewayPermission:
     Type: AWS::Lambda::Permission
     Properties:
       FunctionName: !GetAtt QuicksightCognitoFunction.Arn
@@ -151,7 +151,7 @@ Resources:
   CognitoAuthenticatedRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: cognito-connected-user-role
+      RoleName: cognito-auth-role
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -170,17 +170,16 @@ Resources:
                   - mobileanalytics:PutEvents
                   - cognito-sync:*
                   - cognito-identity:*
-                  - quicksight:RegisterUser
-                  - quicksight:GetDashboardEmbedUrl
                   - sts:AssumeRole
+                  #- sts:AssumeRoleWithWebIdentity
                 Effect: Allow
                 Resource: '*'
-          PolicyName: cognito-connected-user-policy
+          PolicyName: cognito-auth-policy
 
   CognitoUnAuthenticatedRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: cognito-guest-user-role
+      RoleName: cognito-unauth-role
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -200,8 +199,31 @@ Resources:
                   - cognito-sync:*
                 Effect: Allow
                 Resource: '*'
-          PolicyName: cognito-guest-user-policy
+          PolicyName: cognito-unauth-policy
 #### ####
 
 #### Quicksight ####
+  ConnectedUserRoleToAssume:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: cognito-quicksight-assumed-role
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Policies:
+        - PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Action:
+                  - quicksight:RegisterUser
+                  - quicksight:GetDashboardEmbedUrl
+                Effect: Allow
+                Resource: '*'
+          PolicyName: cognito-quicksight-assumed-policy
 #### ####
