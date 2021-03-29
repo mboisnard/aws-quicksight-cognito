@@ -1,7 +1,8 @@
 Resources:
 
 #### Lambda ####
-  # You can use AWS::Serverless::Function task to wrap IAM execution role & Lambda Function creation inside only one task
+  # You can use AWS Serverless Application Model (SAM) tasks (AWS::Serverless::HttpApi, AWS::Serverless::Function) to easily create a serverless application.
+  # This hides some creation tasks (iam roles, logs, api gateway links, ...), this is not the goal here.
 
   LambdaExecutionRole:
     Type: AWS::IAM::Role
@@ -226,4 +227,6 @@ Resources:
                 Effect: Allow
                 Resource: '*'
           PolicyName: cognito-quicksight-assumed-policy
+
+  # Add quicksight create account + quicksight create analysis (AWS::QuickSight::Analysis) + quicksight create dashboard (AWS::QuickSight::Dashboard) when it's possible with CloudFormation
 #### ####

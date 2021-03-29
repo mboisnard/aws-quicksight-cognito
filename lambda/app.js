@@ -20,7 +20,7 @@ const handleErrorAsync = func => (req, res, next) => {
         .catch((error) => next(error));
 };
 
-router.get('/url', handleErrorAsync(async (req, res, next) => {
+router.get('/quicksight-cognito/url', handleErrorAsync(async (req, res, next) => {
 
     const { event } = getCurrentInvoke();
 
