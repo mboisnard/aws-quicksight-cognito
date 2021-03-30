@@ -78,11 +78,26 @@ Resources:
       RequestParameters:
         'overwrite:path': '$request.path' # Remove any stage name from path
 
+  APIGatewayAuthorizer:
+    Type: AWS::ApiGatewayV2::Authorizer
+    Properties:
+      ApiId: !Ref APIGatewayHttpApi
+      AuthorizerType: JWT
+      IdentitySource:
+        - "$request.header.Authorization"
+      JwtConfiguration:
+        Audience:
+          - !Ref CognitoUserPoolClient
+        Issuer: !Sub "https://cognito-idp.${AWS::Region}.amazonaws.com/${CognitoUserPool}"
+      Name: JwtCognitoAuthorizer
+
   APIGatewayLambdaProxyRoute:
     Type: AWS::ApiGatewayV2::Route
     Properties:
       ApiId: !Ref APIGatewayHttpApi
       RouteKey: 'ANY /quicksight-cognito/{proxy+}'
+      AuthorizationType: JWT
+      AuthorizerId: !Ref APIGatewayAuthorizer
       Target: !Join
         - /
         - - integrations
@@ -120,15 +135,7 @@ Resources:
       AccessTokenValidity: 1 # eq 1 hour
       IdTokenValidity: 1 # eq 1 hour
       RefreshTokenValidity: 1 # eq 1 day
-      AllowedOAuthFlows:
-        - code
-      AllowedOAuthScopes:
-        - openid
-        - email
-      AllowedOAuthFlowsUserPoolClient: true
-      CallbackURLs:
-        - http://localhost:8080/callback
-      GenerateSecret: true
+      AllowedOAuthFlowsUserPoolClient: false
       SupportedIdentityProviders:
         - COGNITO
 
@@ -191,16 +198,6 @@ Resources:
             Action:
               - sts:AssumeRoleWithWebIdentity
             Condition: { "ForAnyValue:StringLike": { "cognito-identity.amazonaws.com:amr": "unauthenticated" },  "StringEquals": { "cognito-identity.amazonaws.com:aud": !Ref CognitoIdentityPool } }
-      Policies:
-        - PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Action:
-                  - mobileanalytics:PutEvents
-                  - cognito-sync:*
-                Effect: Allow
-                Resource: '*'
-          PolicyName: cognito-unauth-policy
 #### ####
 
 #### Quicksight ####
@@ -213,8 +210,8 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              Service:
-                - lambda.amazonaws.com
+              Federated:
+                - cognito-identity.amazonaws.com
             Action:
               - sts:AssumeRole
       Policies:
