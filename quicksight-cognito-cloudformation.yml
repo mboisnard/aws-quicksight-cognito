@@ -46,7 +46,7 @@ Resources:
       Environment:
         Variables:
           COGNITO_IDENTITY_POOL_ID: !Ref CognitoIdentityPool
-          COGNITO_USER_POOL_URL: !GetAtt CognitoUserPool.ProviderURL
+          COGNITO_USER_POOL_URL: !GetAtt CognitoUserPool.ProviderURL # Remove https://
           STS_ROLE_ARN_TO_ASSUME: !GetAtt ConnectedUserRoleToAssume.Arn
           QUICKSIGHT_REGION: !Ref 'AWS::Region'
           QUICKSIGHT_DASHBOARD_ID: dashboardId
@@ -178,8 +178,6 @@ Resources:
                   - mobileanalytics:PutEvents
                   - cognito-sync:*
                   - cognito-identity:*
-                  - sts:AssumeRole
-                  #- sts:AssumeRoleWithWebIdentity
                 Effect: Allow
                 Resource: '*'
           PolicyName: cognito-auth-policy
@@ -213,7 +211,7 @@ Resources:
               Federated:
                 - cognito-identity.amazonaws.com
             Action:
-              - sts:AssumeRole
+              - sts:AssumeRoleWithWebIdentity
       Policies:
         - PolicyDocument:
             Version: 2012-10-17

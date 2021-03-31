@@ -24,7 +24,7 @@ router.get('/quicksight-cognito/url', handleErrorAsync(async (req, res, next) =>
 
     const { event } = getCurrentInvoke();
 
-    const extractedIdToken = event.headers.Authorization;
+    const extractedIdToken = event.headers.authorization;
     const decodedIdToken = jwtDecode(extractedIdToken);
 
     const cognitoInfos = {

@@ -12,3 +12,10 @@ Environment variables:
 - QUICKSIGHT_DASHBOARD_ID
 
 - AWS_ACCOUNT_ID
+
+
+@aws-sdk/client-quicksight https://www.npmjs.com/package/@aws-sdk/client-quicksight
+
+@aws-sdk/client-cognito-identity https://www.npmjs.com/package/@aws-sdk/client-cognito-identity
+
+@aws-sdk/client-sts https://www.npmjs.com/package/@aws-sdk/client-sts

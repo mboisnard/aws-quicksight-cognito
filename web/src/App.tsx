@@ -3,14 +3,15 @@ import './App.css';
 import Amplify from 'aws-amplify';
 import { withAuthenticator, AmplifySignOut } from '@aws-amplify/ui-react';
 import awsconfig from './aws-exports';
+import {Dashboard} from './features/dashboard/Dashboard';
 
 Amplify.configure(awsconfig);
 
 const App = () => (
-    <div>
+    <>
       <AmplifySignOut />
-      My App
-    </div>
+      <Dashboard />
+    </>
 );
 
 export default withAuthenticator(App);
