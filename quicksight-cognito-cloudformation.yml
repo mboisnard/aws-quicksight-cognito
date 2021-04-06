@@ -46,7 +46,7 @@ Resources:
       Environment:
         Variables:
           COGNITO_IDENTITY_POOL_ID: !Ref CognitoIdentityPool
-          COGNITO_USER_POOL_URL: !GetAtt CognitoUserPool.ProviderURL # Remove https://
+          COGNITO_USER_POOL_URL: !Select [1, !Split ["://", !GetAtt CognitoUserPool.ProviderURL]] # Remove https:// from provider url
           STS_ROLE_ARN_TO_ASSUME: !GetAtt ConnectedUserRoleToAssume.Arn
           QUICKSIGHT_REGION: !Ref 'AWS::Region'
           QUICKSIGHT_DASHBOARD_ID: dashboardId
@@ -91,13 +91,23 @@ Resources:
         Issuer: !Sub "https://cognito-idp.${AWS::Region}.amazonaws.com/${CognitoUserPool}"
       Name: JwtCognitoAuthorizer
 
-  APIGatewayLambdaProxyRoute:
+  APIGatewayGetLambdaProxyRoute:
     Type: AWS::ApiGatewayV2::Route
     Properties:
       ApiId: !Ref APIGatewayHttpApi
-      RouteKey: 'ANY /quicksight-cognito/{proxy+}'
+      RouteKey: 'GET /quicksight-cognito/{proxy+}'
       AuthorizationType: JWT
       AuthorizerId: !Ref APIGatewayAuthorizer
+      Target: !Join
+        - /
+        - - integrations
+          - !Ref APIGatewayLambdaIntegration
+
+  APIGatewayOptionsLambdaProxyRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref APIGatewayHttpApi
+      RouteKey: 'OPTIONS /quicksight-cognito/{proxy+}'
       Target: !Join
         - /
         - - integrations
