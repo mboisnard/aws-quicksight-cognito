@@ -58,6 +58,12 @@ Resources:
       FunctionName: !GetAtt QuicksightCognitoFunction.Arn
       Action: lambda:InvokeFunction
       Principal: apigateway.amazonaws.com
+
+  LambdaLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${QuicksightCognitoFunction}"
+      RetentionInDays: 1
 #### ####
 
 #### API Gateway ####
