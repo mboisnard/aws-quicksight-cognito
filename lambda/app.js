@@ -4,9 +4,11 @@ const cors = require('cors');
 const jwtDecode = require('jwt-decode');
 
 const { getCurrentInvoke } = require('@vendia/serverless-express');
+import { QuickSightClient } from '@aws-sdk/client-quicksight';
+import {CognitoIdentityClient, GetIdCommand, GetOpenIdTokenCommand} from '@aws-sdk/client-cognito-identity';
 
 const AWS = require("aws-sdk");
-const cognitoIdentity = new AWS.CognitoIdentity();
+const cognitoIdentity = new CognitoIdentityClient({ region: process.env.QUICKSIGHT_REGION });
 const stsClient = new AWS.STS();
 
 const app = express();
@@ -85,20 +87,23 @@ router.get('/quicksight-cognito/url', handleErrorAsync(async (req, res, next) =>
 
 async function getCognitoOpenIdToken(cognitoInfos) {
 
-    const params = {
+    const getIdCommand = new GetIdCommand({
         IdentityPoolId: cognitoInfos.identityPoolId,
         Logins: {
             [cognitoInfos.userPoolUrl] : cognitoInfos.idToken
         }
-    };
+    });
 
-    const cognitoId = await cognitoIdentity.getId(params).promise();
+    const { IdentityId } = await cognitoIdentity.send(getIdCommand);
 
-    cognitoId.Logins = {
-        [cognitoInfos.userPoolUrl] : cognitoInfos.idToken
-    };
+    const getOpenIdTokenCommand = new GetOpenIdTokenCommand({
+        IdentityId: IdentityId,
+        Logins: {
+            [cognitoInfos.userPoolUrl] : cognitoInfos.idToken
+        }
+    });
 
-    return cognitoIdentity.getOpenIdToken(cognitoId).promise();
+    return cognitoIdentity.send(getOpenIdTokenCommand);
 }
 
 async function getConnectedCognitoUserTemporaryIAMCredentials(cognitoInfos, stsInfos) {
