@@ -241,3 +241,13 @@ Resources:
 
   # Add quicksight create account + quicksight create analysis (AWS::QuickSight::Analysis) + quicksight create dashboard (AWS::QuickSight::Dashboard) when it's possible with CloudFormation
 #### ####
+
+#### S3 Website ####
+  WebAppS3Bucket:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      AccessControl: PublicRead
+      BucketName: quicksight-cognito-web-app-s3
+      WebsiteConfiguration:
+        IndexDocument: index.html
+#### ####

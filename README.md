@@ -19,3 +19,5 @@ Environment variables:
 @aws-sdk/client-cognito-identity https://www.npmjs.com/package/@aws-sdk/client-cognito-identity
 
 @aws-sdk/client-sts https://www.npmjs.com/package/@aws-sdk/client-sts
+
+https://www.developer.quicksight.aws/
