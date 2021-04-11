@@ -294,10 +294,17 @@ Resources:
 #### ####
 
 #### CI/CD User to deploy Web App / Lambda files #####
+  IAMGroup:
+    Type: AWS::IAM::Group
+    Properties:
+      GroupName: quicksight-cognito-operators-grp
+
   IAMUser:
     Type: AWS::IAM::User
     Properties:
       UserName: ci-user
+      Groups:
+        - !Ref IAMGroup
 
   IAMUserAccessKey:
     Type: AWS::IAM::AccessKey
@@ -325,8 +332,8 @@ Resources:
             Action:
               - lambda:UpdateFunctionCode
             Resource: !GetAtt QuicksightCognitoFunction.Arn
-      Users:
-        - !Ref IAMUser
+      Groups:
+        - !Ref IAMGroup
 
 #### ####
 
