@@ -259,7 +259,7 @@ Resources:
           - Action:
               - s3:GetObject
             Principal:
-              AWS: !Sub 'arn:aws:iam::cloudfront:user/${WebAppAccessIdentity.Id}'
+              CanonicalUser: !GetAtt WebAppAccessIdentity.S3CanonicalUserId
             Effect: Allow
             Resource: !Sub '${WebAppS3Bucket.Arn}/*'
 
