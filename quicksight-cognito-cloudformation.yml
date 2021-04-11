@@ -238,7 +238,7 @@ Resources:
 
 #### S3 Website ####
   WebAppS3Bucket:
-    Type: 'AWS::S3::Bucket'
+    Type: AWS::S3::Bucket
     Properties:
       AccessControl: Private
       BucketName: quicksight-cognito-web-app-s3
@@ -293,7 +293,48 @@ Resources:
         PriceClass: PriceClass_100
 #### ####
 
+#### CI/CD User to deploy Web App / Lambda files #####
+  IAMUser:
+    Type: AWS::IAM::User
+    Properties:
+      UserName: ci-user
+
+  IAMUserAccessKey:
+    Type: AWS::IAM::AccessKey
+    Properties:
+      Status: Active
+      UserName: !Ref IAMUser
+
+  FilesUploadPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: quicksight-cognito-upload-code-policy
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - s3:ListBucket
+            Resource: !GetAtt WebAppS3Bucket.Arn
+          - Effect: Allow
+            Action:
+              - s3:PutObject
+              - s3:DeleteObject
+            Resource: !Sub '${WebAppS3Bucket.Arn}/*'
+          - Effect: Allow
+            Action:
+              - lambda:UpdateFunctionCode
+            Resource: !GetAtt QuicksightCognitoFunction.Arn
+      Users:
+        - !Ref IAMUser
+
+#### ####
+
 Outputs:
   WebAppCloudFrontUrl:
     Description: Web App Domain name to add to Quicksight Domains & Integration
     Value: !GetAtt WebAppDistribution.DomainName
+
+  CIUserAccessKey:
+    Description: CI User Access Information
+    Value: !Sub 'Access Key: ${IAMUserAccessKey}, Secret Key: ${IAMUserAccessKey.SecretAccessKey}' # Be careful with credentials in Cloudformation output :)
