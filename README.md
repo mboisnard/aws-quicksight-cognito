@@ -13,6 +13,9 @@ Environment variables:
 
 - AWS_ACCOUNT_ID
 
+## Infrastructure
+
+![Infrastructure](./assets/Quicksight-Cognito.png)
 
 @aws-sdk/client-quicksight https://www.npmjs.com/package/@aws-sdk/client-quicksight
 
