@@ -46,11 +46,11 @@ Resources:
       Environment:
         Variables:
           COGNITO_IDENTITY_POOL_ID: !Ref CognitoIdentityPool
-          COGNITO_USER_POOL_URL: !Select [1, !Split ["://", !GetAtt CognitoUserPool.ProviderURL]] # Remove https:// from provider url
+          COGNITO_USER_POOL_URL: !Select [1, !Split ['://', !GetAtt CognitoUserPool.ProviderURL]] # Remove https:// from provider url
           STS_ROLE_ARN_TO_ASSUME: !GetAtt ConnectedUserRoleToAssume.Arn
-          QUICKSIGHT_REGION: !Ref 'AWS::Region'
+          QUICKSIGHT_REGION: !Ref AWS::Region
           QUICKSIGHT_DASHBOARD_ID: dashboardId
-          AWS_ACCOUNT_ID: !Ref 'AWS::AccountId'
+          AWS_ACCOUNT_ID: !Ref AWS::AccountId
 
   LambdaApiGatewayPermission:
     Type: AWS::Lambda::Permission
@@ -62,7 +62,7 @@ Resources:
   LambdaLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub "/aws/lambda/${QuicksightCognitoFunction}"
+      LogGroupName: !Sub '/aws/lambda/${QuicksightCognitoFunction}'
       RetentionInDays: 1
 #### ####
 
@@ -94,7 +94,7 @@ Resources:
       JwtConfiguration:
         Audience:
           - !Ref CognitoUserPoolClient
-        Issuer: !Sub "https://cognito-idp.${AWS::Region}.amazonaws.com/${CognitoUserPool}"
+        Issuer: !Sub 'https://cognito-idp.${AWS::Region}.amazonaws.com/${CognitoUserPool}'
       Name: JwtCognitoAuthorizer
 
   APIGatewayGetLambdaProxyRoute:
@@ -104,20 +104,14 @@ Resources:
       RouteKey: 'GET /quicksight-cognito/{proxy+}'
       AuthorizationType: JWT
       AuthorizerId: !Ref APIGatewayAuthorizer
-      Target: !Join
-        - /
-        - - integrations
-          - !Ref APIGatewayLambdaIntegration
+      Target: !Sub 'integrations/${APIGatewayLambdaIntegration}'
 
   APIGatewayOptionsLambdaProxyRoute:
     Type: AWS::ApiGatewayV2::Route
     Properties:
       ApiId: !Ref APIGatewayHttpApi
       RouteKey: 'OPTIONS /quicksight-cognito/{proxy+}'
-      Target: !Join
-        - /
-        - - integrations
-          - !Ref APIGatewayLambdaIntegration
+      Target: !Sub 'integrations/${APIGatewayLambdaIntegration}'
 
   APIGatewayLogGroup:
     Type: AWS::Logs::LogGroup
@@ -298,3 +292,8 @@ Resources:
           ViewerProtocolPolicy: redirect-to-https
         PriceClass: PriceClass_100
 #### ####
+
+Outputs:
+  WebAppCloudFrontUrl:
+    Description: Web App Domain name to add to Quicksight Domains & Integration
+    Value: !GetAtt WebAppDistribution.DomainName
