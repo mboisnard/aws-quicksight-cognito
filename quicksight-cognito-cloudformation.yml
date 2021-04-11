@@ -333,7 +333,7 @@ Resources:
 Outputs:
   WebAppCloudFrontUrl:
     Description: Web App Domain name to add to Quicksight Domains & Integration
-    Value: !GetAtt WebAppDistribution.DomainName
+    Value: !Sub 'https://${WebAppDistribution.DomainName}'
 
   CIUserAccessKey:
     Description: CI User Access Information
