@@ -13,7 +13,7 @@ Quicksight Cognito lambda configured to display Quicksight Dashboard inside web 
 1. Build webapp & lambda codes
    ```
    $ cd web && yarn install && yarn build
-   $ cd ../lambda && npm install
+   $ cd ../lambda && npm install && npm run build
    ```
 1. Deploy built code using [CLI](https://aws.amazon.com/fr/cli/) or manually
     1. Retrieve CI User Access Key information in CloudFormation stack output & configure your CLI to use it (`aws configure`)
@@ -25,6 +25,7 @@ Quicksight Cognito lambda configured to display Quicksight Dashboard inside web 
 1. Configure Quicksight to allow your frontend domain url to display an embedded dashboard
     1. Retrieve your domain name in Cloudformation stack output
     1. Go to `Domains & Integration` in Quicksight and add your domain name to the list
+1. Create Quicksight Dashboard & and complete Lambda `QUICKSIGHT_DASHBOARD_ID` environment variable with dashboard id 
 
 ## Environment variables used by Lambda code
 
@@ -38,12 +39,7 @@ Quicksight Cognito lambda configured to display Quicksight Dashboard inside web 
 
 - AWS_ACCOUNT_ID (configured by Cloudformation)
 
-## Javascript SDK v3
+## Documentation
 
-@aws-sdk/client-quicksight https://www.npmjs.com/package/@aws-sdk/client-quicksight
-
-@aws-sdk/client-cognito-identity https://www.npmjs.com/package/@aws-sdk/client-cognito-identity
-
-@aws-sdk/client-sts https://www.npmjs.com/package/@aws-sdk/client-sts
-
-https://www.developer.quicksight.aws/
+* [Quicksight Developer Portal](https://www.developer.quicksight.aws/)
+* [Learn Quicksight Workshops](https://learnquicksight.workshop.aws/en/dashboard-embedding.html)
