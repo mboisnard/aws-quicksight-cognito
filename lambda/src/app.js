@@ -1,12 +1,12 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const cors = require('cors');
-const jwtDecode = require('jwt-decode');
+import cors from 'cors';
+import express from 'express';
+import bodyParser from 'body-parser';
+import jwtDecode from'jwt-decode';
 
-const { getCurrentInvoke } = require('@vendia/serverless-express');
-const { QuickSightClient, RegisterUserCommand, GetDashboardEmbedUrlCommand } = require('@aws-sdk/client-quicksight');
-const { CognitoIdentityClient, GetIdCommand, GetOpenIdTokenCommand } = require('@aws-sdk/client-cognito-identity');
-const { STSClient, AssumeRoleWithWebIdentityCommand } = require('@aws-sdk/client-sts');
+import { getCurrentInvoke } from '@vendia/serverless-express';
+import { QuickSightClient, RegisterUserCommand, GetDashboardEmbedUrlCommand } from '@aws-sdk/client-quicksight';
+import { CognitoIdentityClient, GetIdCommand, GetOpenIdTokenCommand } from '@aws-sdk/client-cognito-identity';
+import { STSClient, AssumeRoleWithWebIdentityCommand } from '@aws-sdk/client-sts';
 
 const cognitoIdentity = new CognitoIdentityClient({ region: process.env.QUICKSIGHT_REGION });
 const stsClient = new STSClient({ region: process.env.QUICKSIGHT_REGION });
