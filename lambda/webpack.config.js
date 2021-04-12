@@ -11,7 +11,6 @@ module.exports = {
         library: {
             type: 'commonjs2'
         },
-        // library: 'serverlessExpressEdge',
         libraryTarget: 'commonjs2'
     },
     plugins: []
