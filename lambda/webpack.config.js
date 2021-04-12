@@ -4,14 +4,12 @@ module.exports = {
     entry: './index.js',
     target: 'node',
     mode: 'production',
-    devtool: 'source-map',
+    optimization:{
+        minimize: false
+    },
     output: {
         path: path.join(__dirname, 'dist'),
         filename: '[name].js',
-        library: {
-            type: 'commonjs2'
-        },
-        libraryTarget: 'commonjs2'
-    },
-    plugins: []
-}
+        libraryTarget: "commonjs2"
+    }
+};
