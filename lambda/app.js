@@ -4,12 +4,12 @@ const cors = require('cors');
 const jwtDecode = require('jwt-decode');
 
 const { getCurrentInvoke } = require('@vendia/serverless-express');
-import { QuickSightClient } from '@aws-sdk/client-quicksight';
-import {CognitoIdentityClient, GetIdCommand, GetOpenIdTokenCommand} from '@aws-sdk/client-cognito-identity';
+import { QuickSightClient, RegisterUserCommand, GetDashboardEmbedUrlCommand } from '@aws-sdk/client-quicksight';
+import { CognitoIdentityClient, GetIdCommand, GetOpenIdTokenCommand } from '@aws-sdk/client-cognito-identity';
+import { STSClient, AssumeRoleWithWebIdentityCommand } from '@aws-sdk/client-sts';
 
-const AWS = require("aws-sdk");
 const cognitoIdentity = new CognitoIdentityClient({ region: process.env.QUICKSIGHT_REGION });
-const stsClient = new AWS.STS();
+const stsClient = new STSClient({ region: process.env.QUICKSIGHT_REGION });
 
 const app = express();
 const router = express.Router();
@@ -60,7 +60,7 @@ router.get('/quicksight-cognito/url', handleErrorAsync(async (req, res, next) =>
 
     const credentials = await getConnectedCognitoUserTemporaryIAMCredentials(cognitoInfos, stsInfos);
 
-    const quicksightApi = new AWS.QuickSight({
+    const quicksightApi = new QuickSightClient({
         region: quickSightInfos.region,
         credentials: {
             accessKeyId: credentials.Credentials.AccessKeyId,
@@ -110,18 +110,18 @@ async function getConnectedCognitoUserTemporaryIAMCredentials(cognitoInfos, stsI
 
     const openIdToken = await getCognitoOpenIdToken(cognitoInfos);
 
-    const stsParams = {
+    const assumeRoleWithWebIdentityCommand = new AssumeRoleWithWebIdentityCommand({
         RoleSessionName: stsInfos.sessionName,
         WebIdentityToken: openIdToken.Token,
         RoleArn: stsInfos.roleToAssumeArn
-    };
-    
-    return stsClient.assumeRoleWithWebIdentity(stsParams).promise();
+    });
+
+    return stsClient.send(assumeRoleWithWebIdentityCommand);
 }
 
 async function createQuicksightUserIfNotExists(quicksightApi, quickSightInfos) {
 
-    const userToRegisterParams = {
+    const registerUserCommand = new RegisterUserCommand({
         AwsAccountId: quickSightInfos.accountId,
         Email: quickSightInfos.user.email,
         IdentityType: 'IAM',
@@ -129,23 +129,23 @@ async function createQuicksightUserIfNotExists(quicksightApi, quickSightInfos) {
         UserRole: quickSightInfos.user.roleName,
         IamArn: quickSightInfos.user.iamRoleArn,
         SessionName: quickSightInfos.user.sessionName
-    };
+    });
 
-    return quicksightApi.registerUser(userToRegisterParams).promise();
+    return quicksightApi.send(registerUserCommand);
 }
 
 async function getQuicksightEmbeddedUrl(quicksightApi, quickSightInfos) {
 
-    const dashboardParams = {
+    const dashboardEmbeddedUrlCommand = new GetDashboardEmbedUrlCommand({
         AwsAccountId: quickSightInfos.accountId,
         DashboardId: quickSightInfos.dashboard.id,
         IdentityType: 'IAM',
         ResetDisabled: quickSightInfos.dashboard.disableReset,
         SessionLifetimeInMinutes: quickSightInfos.dashboard.sessionLifetime,
         UndoRedoDisabled: quickSightInfos.dashboard.disableUndoRedo
-    };
+    });
 
-    return quicksightApi.getDashboardEmbedUrl(dashboardParams).promise();
+    return quicksightApi.send(dashboardEmbeddedUrlCommand);
 }
 
 function errorHandler(err, req, res, next) {
