@@ -43,3 +43,4 @@ Quicksight Cognito lambda configured to display Quicksight Dashboard inside web 
 
 * [Quicksight Developer Portal](https://www.developer.quicksight.aws/)
 * [Learn Quicksight Workshops](https://learnquicksight.workshop.aws/en/dashboard-embedding.html)
+* [Quicksight-Cognito with Amplify Github](https://github.com/aurbac/amplify-quicksight-dashboard-embedded)
