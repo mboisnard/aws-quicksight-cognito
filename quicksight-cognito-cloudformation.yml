@@ -35,7 +35,7 @@ Resources:
     Type: AWS::Lambda::Function
     Properties:
       FunctionName: quicksight-cognito-lambda
-      Handler: index.handler
+      Handler: main.handler
       Runtime: nodejs12.x
       Role: !GetAtt LambdaExecutionRole.Arn
       Code:
