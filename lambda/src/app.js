@@ -1,7 +1,7 @@
 import cors from 'cors';
 import express from 'express';
 import bodyParser from 'body-parser';
-import jwtDecode from'jwt-decode';
+import jwtDecode from 'jwt-decode';
 
 import { getCurrentInvoke } from '@vendia/serverless-express';
 import { QuickSightClient, RegisterUserCommand, GetDashboardEmbedUrlCommand } from '@aws-sdk/client-quicksight';
@@ -73,7 +73,7 @@ router.get('/quicksight-cognito/url', handleErrorAsync(async (req, res, next) =>
     try {
         await createQuicksightUserIfNotExists(quicksightApi, quickSightInfos);
     } catch (err) {
-        if (!err.code || err.code !== 'ResourceExistsException') {
+        if (!err.name || err.name !== 'ResourceExistsException') {
             next(err);
         }
     }
@@ -149,6 +149,8 @@ async function getQuicksightEmbeddedUrl(quicksightApi, quickSightInfos) {
 }
 
 function errorHandler(err, req, res, next) {
+    console.error(err);
+
     return res.status(500).json({
         status: 'error',
         message: err.message
