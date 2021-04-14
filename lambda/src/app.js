@@ -158,4 +158,4 @@ function errorHandler(err, req, res, next) {
 app.use('/', router);
 app.use(errorHandler);
 
-module.exports = app;
+export default app;
