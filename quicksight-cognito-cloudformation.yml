@@ -51,6 +51,7 @@ Resources:
           QUICKSIGHT_REGION: !Ref AWS::Region
           QUICKSIGHT_DASHBOARD_ID: dashboardId
           AWS_ACCOUNT_ID: !Ref AWS::AccountId
+          AWS_REGION: !Ref AWS::Region
 
   LambdaApiGatewayPermission:
     Type: AWS::Lambda::Permission
