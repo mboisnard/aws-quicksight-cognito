@@ -8,8 +8,8 @@ import { QuickSightClient, RegisterUserCommand, GetDashboardEmbedUrlCommand } fr
 import { CognitoIdentityClient, GetIdCommand, GetOpenIdTokenCommand } from '@aws-sdk/client-cognito-identity';
 import { STSClient, AssumeRoleWithWebIdentityCommand } from '@aws-sdk/client-sts';
 
-const cognitoIdentity = new CognitoIdentityClient({ region: process.env.QUICKSIGHT_REGION });
-const stsClient = new STSClient({ region: process.env.QUICKSIGHT_REGION });
+const cognitoIdentity = new CognitoIdentityClient({ region: process.env.AWS_REGION });
+const stsClient = new STSClient({ region: process.env.AWS_REGION });
 
 const app = express();
 const router = express.Router();
