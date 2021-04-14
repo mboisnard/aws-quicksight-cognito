@@ -9,19 +9,21 @@
     "@aws-sdk/client-sts": "^3.12.0",
     "@vendia/serverless-express": "^4.3.4",
     "body-parser": "^1.19.0",
+    "core-js": "^3.10.1",
     "cors": "^2.8.5",
     "express": "^4.17.1",
-    "jwt-decode": "^3.1.2"
+    "jwt-decode": "^3.1.2",
+    "regenerator-runtime": "^0.13.7"
   },
   "devDependencies": {
-    "@babel/cli": "^7.13.14",
     "@babel/core": "^7.13.15",
-    "@babel/node": "^7.13.13",
     "@babel/preset-env": "^7.13.15",
-    "cross-env": "^7.0.3"
+    "babel-loader": "^8.2.2",
+    "webpack": "^5.33.2",
+    "webpack-cli": "^4.6.0"
   },
   "scripts": {
-    "babel": "./node_modules/.bin/babel ./src --out-dir ./dist"
+    "build": "webpack"
   },
   "author": "",
   "license": "ISC"

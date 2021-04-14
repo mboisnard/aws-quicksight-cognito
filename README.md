@@ -13,7 +13,7 @@ Quicksight Cognito lambda configured to display Quicksight Dashboard inside web 
 1. Build webapp & lambda codes
    ```
    $ cd web && yarn install && yarn build
-   $ cd ../lambda && npm install && npm run build
+   $ cd ../lambda && yarn install && yarn build
    ```
 1. Deploy built code using [CLI](https://aws.amazon.com/fr/cli/) or manually
     1. Retrieve CI User Access Key information in CloudFormation stack output & configure your CLI to use it (`aws configure`)
