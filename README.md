@@ -2,6 +2,8 @@
 
 Quicksight Cognito lambda configured to display Quicksight Dashboard inside web application without Amplify black magic.
 
+Technologies: API Gateway V2, S3 bucket, Quicksight, Cognito, IAM, CloudFormation, AWS SDK v3, Javascript Lambda compiled with Babel + Webpack, React webApp with Amplify library
+
 ## Infrastructure
 
 ![Infrastructure](./assets/Quicksight-Cognito.png)
@@ -38,6 +40,7 @@ Quicksight Cognito lambda configured to display Quicksight Dashboard inside web 
 - QUICKSIGHT_DASHBOARD_ID (configured manually)
 
 - AWS_ACCOUNT_ID (configured by Cloudformation)
+- AWS_REGION (configured by Cloudformation)
 
 ## Documentation
 
